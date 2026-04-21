@@ -8,7 +8,7 @@ part of 'history.dart';
 
 class HistoryAdapter extends TypeAdapter<History> {
   @override
-  final int typeId = 2;
+  final typeId = 2;
 
   @override
   History read(BinaryReader reader) {
@@ -23,7 +23,7 @@ class HistoryAdapter extends TypeAdapter<History> {
       userName: fields[3] as String,
       face: fields[4] as String,
       updateTime: fields[5] as DateTime,
-      watchDuration: fields[6] as String?,
+      watchDuration: fields[6] == null ? "00:00:00" : fields[6] as String?,
     );
   }
 

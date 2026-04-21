@@ -6,17 +6,20 @@ part 'follow_user.g.dart';
 
 @HiveType(typeId: 1)
 class FollowUser implements Mappable {
-  FollowUser(
-      {required this.id,
-      required this.roomId,
-      required this.siteId,
-      required this.userName,
-      required this.face,
-      required this.addTime,
-      this.watchDuration = "00:00:00",
-      this.tag = "全部",
-      this.remark = "",
-      this.romanName = ""});
+  FollowUser({
+    required this.id,
+    required this.roomId,
+    required this.siteId,
+    required this.userName,
+    required this.face,
+    required this.addTime,
+    this.watchDuration = "00:00:00",
+    this.tag = "全部",
+    this.remark = "",
+    this.romanName = "",
+    this.syncDuration = 0,
+    this.watchDurationSec = 0,
+  });
 
   ///id=siteId_roomId
   @HiveField(0)
@@ -49,6 +52,12 @@ class FollowUser implements Mappable {
   @HiveField(9)
   String? romanName;
 
+  @HiveField(10, defaultValue: 0)
+  int syncDuration; // 需要同步增加的观看时长
+
+  @HiveField(11, defaultValue: 0)
+  int watchDurationSec; // watchDuration -> sec easy to calculate
+
   /// 直播状态
   /// 0=未知(加载中) 1=未开播 2=直播中
   Rx<int> liveStatus = 0.obs;
@@ -62,16 +71,19 @@ class FollowUser implements Mappable {
   Rx<int> online = 0.obs;
 
   factory FollowUser.fromJson(Map<String, dynamic> json) => FollowUser(
-      id: json['id'],
-      roomId: json['roomId'],
-      siteId: json['siteId'],
-      userName: json['userName'],
-      face: json['face'],
-      addTime: DateTime.parse(json['addTime']),
-      watchDuration: json["watchDuration"] ?? "00:00:00",
-      tag: json["tag"] ?? "全部",
-      remark: json["remark"] ?? "",
-      romanName: json["romanName"] ?? "");
+        id: json['id'],
+        roomId: json['roomId'],
+        siteId: json['siteId'],
+        userName: json['userName'],
+        face: json['face'],
+        addTime: DateTime.parse(json['addTime']),
+        watchDuration: json["watchDuration"] ?? "00:00:00",
+        tag: json["tag"] ?? "全部",
+        remark: json["remark"] ?? "",
+        romanName: json["romanName"] ?? "",
+        syncDuration: json["syncDuration"] ?? 0,
+        watchDurationSec: json["watchDurationSec"] ?? 0,
+      );
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -83,7 +95,9 @@ class FollowUser implements Mappable {
         "watchDuration": watchDuration ?? "00:00:00",
         "tag": tag,
         "remark": remark,
-        "romanName": romanName
+        "romanName": romanName,
+        "syncDuration": syncDuration,
+        "watchDurationSec": watchDurationSec,
       };
 
   @override

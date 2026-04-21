@@ -267,7 +267,11 @@ class FollowService extends GetxService {
     if (follow == null) {
       return;
     } else {
+      Duration extraDuration = history.watchDuration!.toDuration() -
+          follow.watchDuration!.toDuration();
+      follow.syncDuration = follow.syncDuration + extraDuration.inSeconds;
       follow.watchDuration = history.watchDuration;
+      follow.watchDurationSec = history.watchDuration!.toDuration().inSeconds;
       await addFollow(follow);
     }
     Log.i("已更新当前播放的观看时长：${follow.watchDuration}");

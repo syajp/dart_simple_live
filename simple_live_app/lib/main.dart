@@ -21,9 +21,7 @@ import 'package:simple_live_app/app/log.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/app/utils/listen_fourth_button.dart';
 import 'package:simple_live_app/firebase_options.dart';
-import 'package:simple_live_app/models/db/follow_user.dart';
-import 'package:simple_live_app/models/db/follow_user_tag.dart';
-import 'package:simple_live_app/models/db/history.dart';
+import 'package:simple_live_app/hive_registrar.g.dart';
 import 'package:simple_live_app/modules/other/debug_log_page.dart';
 import 'package:simple_live_app/modules/settings/appstyle_settings/appstyle_setting_contorller.dart';
 import 'package:simple_live_app/routes/app_analytics_observer.dart';
@@ -81,9 +79,7 @@ Future initWindow() async {
 }
 
 Future initServices() async {
-  Hive.registerAdapter(FollowUserAdapter());
-  Hive.registerAdapter(HistoryAdapter());
-  Hive.registerAdapter(FollowUserTagAdapter());
+  Hive.registerAdapters();
 
   //包信息
   Utils.packageInfo = await PackageInfo.fromPlatform();
