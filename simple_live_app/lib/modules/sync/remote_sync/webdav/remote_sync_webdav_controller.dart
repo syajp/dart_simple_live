@@ -39,7 +39,7 @@ class RemoteSyncWebDAVController extends BaseController {
       return;
     }
     // 防呆
-    final filePathCheck = RegExp(r'^/[^/]+$');
+    final filePathCheck = RegExp(r'^/([^/]+)(/[^/]+)*$');
     if (!filePathCheck.hasMatch(newDirectory)) {
       SmartDialog.showToast("请输入正确的文件路径");
       return;
