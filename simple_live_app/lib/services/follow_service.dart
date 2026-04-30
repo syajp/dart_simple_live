@@ -76,10 +76,12 @@ class FollowService extends GetxService {
       }
     });
     initTimer();
+    cleanupTombstones();
     super.onInit();
   }
 
-  Future<void> updateTagName(FollowUserTag followUserTag, String newTagName) async {
+  Future<void> updateTagName(
+      FollowUserTag followUserTag, String newTagName) async {
     final FollowUserTag newTag = followUserTag.copyWith(tag: newTagName);
     updateFollowUserTag(newTag);
     // update item's tag when update tagName
@@ -199,7 +201,8 @@ class FollowService extends GetxService {
     if (toRemove.isNotEmpty) {
       DBService.instance.updateFollowTag(tag);
     }
-    listSortByMethod(curTagFollowList,  AppSettingsController.instance.followSortMethod.value);
+    listSortByMethod(curTagFollowList,
+        AppSettingsController.instance.followSortMethod.value);
   }
 
   void updateFollowTagOrder(FollowUserTag oldTag, FollowUserTag newTag) {
@@ -218,12 +221,15 @@ class FollowService extends GetxService {
   Future<void> addFollow(FollowUser follow) async {
     // follow变动过程中romanName统一变化
     String romanName = "";
-    if(follow.remark !=null && follow.remark!.isNotEmpty){
+    if (follow.remark != null && follow.remark!.isNotEmpty) {
       romanName = PinyinHelper.getShortPinyin(follow.romanName!);
-    }else{
+    } else {
       romanName = PinyinHelper.getShortPinyin(follow.userName);
     }
     follow.romanName = romanName.normalize();
+    // 重新关注时清除墓碑标记
+    follow.deleted = false;
+    follow.updateTime = 0;
     // db.add 其实是update会直接更新数据，所以外表也应该实现此功能：有则更，无则添加
     int index = followList.indexWhere((f) => f.id == follow.id);
     if (index != -1) {
@@ -235,7 +241,7 @@ class FollowService extends GetxService {
     await DBService.instance.addFollow(follow);
   }
 
-  // 取消关注
+  // 取消关注（墓碑机制）
   Future<void> removeFollowUser(String id) async {
     // 存储在线状态，数据修改应followList外表和followBox内表保持同步
     // 后续业务逻辑中，将规避直接业务在数据库上操作，落库操作只执行一次
@@ -252,7 +258,10 @@ class FollowService extends GetxService {
       }
     }
     liveListSort();
-    await DBService.instance.deleteFollow(id);
+    // 设置墓碑标记，而非直接删除记录
+    follow.deleted = true;
+    follow.updateTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    await DBService.instance.addFollow(follow);
   }
 
   // 判断关注是否存在
@@ -310,7 +319,7 @@ class FollowService extends GetxService {
     if (updateStatus) {
       followList.assignAll(list);
       startUpdateStatus(cycle: cycle);
-    }else{
+    } else {
       _updatedListController.add(0);
     }
   }
@@ -444,8 +453,9 @@ class FollowService extends GetxService {
     _updatedListController.add(0);
   }
 
-  void liveListSort(){
-    listSortByMethod(followList, AppSettingsController.instance.followSortMethod.value);
+  void liveListSort() {
+    listSortByMethod(
+        followList, AppSettingsController.instance.followSortMethod.value);
     liveList.assignAll(followList.where((x) => x.liveStatus.value == 2));
     notLiveList.assignAll(followList.where((x) => x.liveStatus.value == 1));
   }
@@ -691,13 +701,14 @@ class FollowService extends GetxService {
         var roman = PinyinHelper.getShortPinyin(follow.remark!).normalize();
         follow.romanName = roman;
       } else {
-        follow.romanName = PinyinHelper.getShortPinyin(follow.userName).normalize();
+        follow.romanName =
+            PinyinHelper.getShortPinyin(follow.userName).normalize();
       }
       await DBService.instance.addFollow(follow);
     }
     Log.i("transfer follow.name to roman is down!");
     for (var follow in followUserListTemp) {
-      if(follow.tag!="全部"){
+      if (follow.tag != "全部") {
         tagMap.putIfAbsent(follow.tag, () => <String>[]).add(follow.id);
       }
     }
@@ -715,7 +726,20 @@ class FollowService extends GetxService {
     }
     await DBService.instance.tagBox.clear();
     await DBService.instance.tagBox.putAll(res);
-    Log.i("Follow-Service: data check down，follows:${followUserListTemp.length}，tags:${tagMap.length}");
+    Log.i(
+        "Follow-Service: data check down，follows:${followUserListTemp.length}，tags:${tagMap.length}");
+  }
+
+  /// 清理墓碑记录：删除 updateTime 超过15天的墓碑
+  Future<void> cleanupTombstones() async {
+    // 墓碑保留15天 = 15 * 24 * 60 * 60 秒
+    const int tombstoneTTL = 15 * 24 * 60 * 60;
+    final beforeTimestamp =
+        (DateTime.now().millisecondsSinceEpoch ~/ 1000) - tombstoneTTL;
+    final count = await DBService.instance.cleanupTombstones(beforeTimestamp);
+    if (count > 0) {
+      Log.i("Follow-Service: cleaned $count tombstone records");
+    }
   }
 
   @override

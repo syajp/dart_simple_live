@@ -19,6 +19,8 @@ class FollowUser implements Mappable {
     this.romanName = "",
     this.syncDuration = 0,
     this.watchDurationSec = 0,
+    this.deleted = false,
+    this.updateTime = 0,
   });
 
   ///id=siteId_roomId
@@ -58,6 +60,14 @@ class FollowUser implements Mappable {
   @HiveField(11, defaultValue: 0)
   int watchDurationSec; // watchDuration -> sec easy to calculate
 
+  /// 墓碑标记：true表示已取消关注
+  @HiveField(12, defaultValue: false)
+  bool deleted;
+
+  /// 墓碑更新时间（秒级时间戳），用于定期清理
+  @HiveField(13, defaultValue: 0)
+  int updateTime;
+
   /// 直播状态
   /// 0=未知(加载中) 1=未开播 2=直播中
   Rx<int> liveStatus = 0.obs;
@@ -83,6 +93,8 @@ class FollowUser implements Mappable {
         romanName: json["romanName"] ?? "",
         syncDuration: json["syncDuration"] ?? 0,
         watchDurationSec: json["watchDurationSec"] ?? 0,
+        deleted: json["deleted"] ?? false,
+        updateTime: json["updateTime"] ?? 0,
       );
 
   Map<String, dynamic> toJson() => {
@@ -98,6 +110,8 @@ class FollowUser implements Mappable {
         "romanName": romanName,
         "syncDuration": syncDuration,
         "watchDurationSec": watchDurationSec,
+        "deleted": deleted,
+        "updateTime": updateTime,
       };
 
   @override

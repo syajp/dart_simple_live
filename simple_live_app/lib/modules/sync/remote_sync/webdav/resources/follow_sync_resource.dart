@@ -30,7 +30,8 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
 
   @override
   Future<FollowBundle> loadLocal() async {
-    var followList = DBService.instance.getFollowList();
+    // 同步时加载所有记录（包含墓碑），确保墓碑可以传播到其他设备
+    var followList = DBService.instance.getAllFollowList();
     var tagList = DBService.instance.getFollowTagList();
     return FollowBundle(
       follows: followList,
@@ -137,16 +138,15 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
     return FollowBundle(follows: resFollows, tags: resTags);
   }
 
-
   // sync-double
   // database op-log maybe better
   // follow: cur! and webdav! -> keep;
   // follow: cur! and webdav? -> cur_item.add_time>cur_last->keep; else->remove;
   // follow: cur? and webdav! -> remote.item.add_time>cur_last->keep; else->remove
   //
-  // bug!: a.cur_last>b.item.add_time > b.cur_last -> remove
-  // fix: need tombstoning
-  // logic: attr->follow.deleted and follow.updateTime
+  // tombstone logic:
+  // follow.deleted=true means the user was unfollowed
+  // follow.updateTime stores the timestamp of the unfollow
   //
   // follow_watchDuration = webdav_watchDuration += syncDuration
   // syncDuration = 0
@@ -158,27 +158,79 @@ class FollowSyncResource implements SyncResource<FollowBundle> {
     final Map<String, FollowUser> result = {};
     final localMap = {for (var item in localList) item.id: item};
     final remoteMap = {for (var item in remoteList) item.id: item};
+    final curLastSec = curLast.millisecondsSinceEpoch ~/ 1000;
 
     for (var localItem in localList) {
       var remoteItem = remoteMap[localItem.id];
-      if (remoteItem != null || localItem.addTime.isAfter(curLast)) {
-        // temp in v10808
-        // after v10810:  remoteItem?.watchDurationSec ?? 0 instead
-        localItem.watchDurationSec =
-            (remoteItem?.watchDuration ?? "00:00:00").toDuration().inSeconds +
-                localItem.syncDuration;
-        localItem.watchDuration =
-            Duration(seconds: localItem.watchDurationSec).toHMSString();
-        localItem.syncDuration = 0;
-        result[localItem.id] = localItem;
+      if (remoteItem != null) {
+        // 两边都有记录，需要合并
+        if (localItem.deleted && remoteItem.deleted) {
+          // 两边都是墓碑，保留 updateTime 更新的
+          result[localItem.id] = localItem.updateTime >= remoteItem.updateTime
+              ? localItem
+              : remoteItem;
+        } else if (localItem.deleted) {
+          // 本地是墓碑，远程是正常记录
+          // 如果本地墓碑时间晚于远程添加时间，则保留墓碑
+          if (localItem.updateTime >=
+              remoteItem.addTime.millisecondsSinceEpoch ~/ 1000) {
+            result[localItem.id] = localItem;
+          } else {
+            // 远程重新关注了，清除墓碑
+            remoteItem.deleted = false;
+            remoteItem.updateTime = 0;
+            result[remoteItem.id] = remoteItem;
+          }
+        } else if (remoteItem.deleted) {
+          // 远程是墓碑，本地是正常记录
+          // 如果远程墓碑时间晚于本地添加时间，则应用远程墓碑
+          if (remoteItem.updateTime >=
+              localItem.addTime.millisecondsSinceEpoch ~/ 1000) {
+            result[remoteItem.id] = remoteItem;
+          } else {
+            // 本地重新关注了，保留本地
+            result[localItem.id] = localItem;
+          }
+        } else {
+          // 两边都是正常记录，合并观看时长
+          localItem.watchDurationSec =
+              (remoteItem.watchDuration ?? "00:00:00").toDuration().inSeconds +
+                  localItem.syncDuration;
+          localItem.watchDuration =
+              Duration(seconds: localItem.watchDurationSec).toHMSString();
+          localItem.syncDuration = 0;
+          result[localItem.id] = localItem;
+        }
+      } else {
+        // 仅本地有记录
+        if (localItem.deleted) {
+          // 本地是墓碑，如果墓碑时间在上次同步之后，保留墓碑以传播到其他设备
+          if (localItem.updateTime > curLastSec) {
+            result[localItem.id] = localItem;
+          }
+          // 否则墓碑已过期，不需要保留
+        } else {
+          // 本地是正常记录，如果添加时间在上次同步之后，保留
+          if (localItem.addTime.isAfter(curLast)) {
+            result[localItem.id] = localItem;
+          }
+        }
       }
     }
 
     for (var remoteItem in remoteList) {
       if (!localMap.containsKey(remoteItem.id)) {
-        // cur? and webdav!
-        if (remoteItem.addTime.isAfter(curLast)) {
-          result[remoteItem.id] = remoteItem;
+        // 仅远程有记录
+        if (remoteItem.deleted) {
+          // 远程是墓碑，如果墓碑时间在上次同步之后，保留墓碑
+          if (remoteItem.updateTime > curLastSec) {
+            result[remoteItem.id] = remoteItem;
+          }
+        } else {
+          // 远程是正常记录，如果添加时间在上次同步之后，保留
+          if (remoteItem.addTime.isAfter(curLast)) {
+            result[remoteItem.id] = remoteItem;
+          }
         }
       }
     }
