@@ -9,7 +9,7 @@ import 'package:simple_live_app/app/sites.dart';
 import 'package:simple_live_app/models/account/douyin_user_info.dart';
 import 'package:simple_live_app/requests/common_request.dart';
 import 'package:simple_live_app/services/local_storage_service.dart';
-import 'package:simple_live_core/simple_live_core.dart';
+import 'package:slive_core/slive_core_compat.dart';
 
 class PlatformService extends GetxService {
   static PlatformService get instance => Get.find<PlatformService>();

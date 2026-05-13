@@ -8,7 +8,7 @@ import 'package:simple_live_app/widgets/keep_alive_wrapper.dart';
 import 'package:simple_live_app/widgets/live_room_card.dart';
 import 'package:simple_live_app/widgets/net_image.dart';
 import 'package:simple_live_app/widgets/page_grid_view.dart';
-import 'package:simple_live_core/simple_live_core.dart';
+import 'package:slive_core/slive_core_compat.dart';
 
 class SearchListView extends StatelessWidget {
   final String tag;

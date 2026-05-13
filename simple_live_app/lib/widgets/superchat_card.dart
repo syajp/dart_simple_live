@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_live_app/app/app_style.dart';
 import 'package:simple_live_app/app/utils.dart';
 import 'package:simple_live_app/widgets/net_image.dart';
-import 'package:simple_live_core/simple_live_core.dart';
+import 'package:slive_core/slive_core_compat.dart';
 
 class SuperChatCard extends StatefulWidget {
   final LiveSuperChatMessage message;

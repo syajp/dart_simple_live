@@ -12,8 +12,8 @@ dependencies:
   flutter_localizations: 
     sdk: flutter
 
-  simple_live_core:
-    path: ../simple_live_core
+  slive_core:
+    path: E:/rustwork/slive_core
   # 图标
   cupertino_icons: ^1.0.8
   remixicon: ^4.9.1 # Remix 图标

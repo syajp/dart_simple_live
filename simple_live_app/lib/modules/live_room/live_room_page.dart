@@ -22,7 +22,7 @@ import 'package:simple_live_app/widgets/settings/settings_card.dart';
 import 'package:simple_live_app/widgets/settings/settings_number.dart';
 import 'package:simple_live_app/widgets/settings/settings_switch.dart';
 import 'package:simple_live_app/widgets/superchat_card.dart';
-import 'package:simple_live_core/simple_live_core.dart';
+import 'package:slive_core/slive_core_compat.dart';
 
 class LiveRoomPage extends GetView<LiveRoomController> {
   const LiveRoomPage({super.key});

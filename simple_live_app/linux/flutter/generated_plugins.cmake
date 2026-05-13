@@ -4,7 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
-  flutter_qjs
   media_kit_libs_linux
   media_kit_video
   screen_retriever_linux
@@ -15,6 +14,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   rust_lib_simple_live_app
+  slive_core
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)
