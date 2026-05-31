@@ -188,6 +188,9 @@ class AppSettingsController extends GetxController {
     hideOfflineFollow.value = LocalStorageService.instance
         .getValue(LocalStorageService.kHideOfflineFollow, false);
 
+    hideRemoveFollowButton.value = LocalStorageService.instance
+        .getValue(LocalStorageService.kHideRemoveFollow, true);
+
     initSiteSort();
     initHomeSort();
 
@@ -637,5 +640,14 @@ class AppSettingsController extends GetxController {
     hideOfflineFollow.value = e;
     LocalStorageService.instance
         .setValue(LocalStorageService.kHideOfflineFollow, e);
+  }
+
+  // 隐藏隐藏快速取关按钮
+  var hideRemoveFollowButton = true.obs;
+
+  void setHideRemoveFollowButton(bool e) {
+    hideRemoveFollowButton.value = e;
+    LocalStorageService.instance
+        .setValue(LocalStorageService.kHideRemoveFollow, e);
   }
 }

@@ -216,6 +216,9 @@ class LocalStorageService extends GetxService {
   /// 隐藏不在线关注
   static const String kHideOfflineFollow = "HideOfflineFollow";
 
+  /// 隐藏取消关注快速按钮
+  static const String kHideRemoveFollow = "kHideRemoveFollow";
+
   /// 虎牙自定义 HYSDK_UA
   static const String kHuyaSdkUa = "HuyaSdkUa";
 

@@ -98,6 +98,15 @@ class FollowSettingsPage extends GetView<FollowAppSettingsController> {
                         },
                       ),
                     ),
+                    Obx(
+                      () => SettingsSwitch(
+                        value: controller.appC.hideRemoveFollowButton.value,
+                        title: "隐藏快速取关按钮",
+                        onChanged: (e) {
+                          controller.setRemoveFollowButton(e);
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
