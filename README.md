@@ -3,7 +3,7 @@
 <p align="center">
     <img width="128" src="/assets/logo.png" alt="Simple Live logo">
 </p>
-<h2 align="center">Slive</h2>
+<h2 align="center">Slive (arb8-legacy)</h2>
 
 <p align="center">
 我就默默看你表演
@@ -13,6 +13,11 @@
 
 ![深色模式](/assets/screenshot_dark.jpg)
 
+> **⚠️ 本分支为 Android 8-9 兼容版本**
+>
+> 本分支专门维护对 Android 8 (API 26) 和 Android 9 (API 27) 的兼容支持。
+> 更低版本的 Android 系统已不再维护，如需使用请升级设备系统。
+> 如需最新功能，请前往 [master 分支](https://github.com/SlotSun/dart_simple_live/tree/master)。
 ## 支持直播平台：
 
 - 虎牙直播
@@ -25,26 +30,10 @@
 
 ## APP支持平台
 
-- [x] Android
-- [x] Windows
-- [x] Linux
-- [x] iOS `自测`
-- [x] MacOS `自测`
-- [ ] Android TV `请自行打包` [说明](https://github.com/SlotSun/dart_simple_live/issues/89)
+- [x] Android 8-9 (API 26-27) `本分支重点支持`
+> **注意**：Android 7 及更低版本已不再支持，请升级至 Android 8 或更高版本
 
-#### Arch Linux: 
-```bash 
-  yay -S slive
-  yay -S slive-bin
-```
-
-只保证Android, Linux和Windows可用性
-
-请到[Releases](https://github.com/slotsun/dart_simple_live/releases)下载最新版本，iOS请到上游或者action下载体验
-
-如果想体验最新功能，可前往[Actions](https://github.com/slotsun/dart_simple_live/actions)下载自动打包的开发版本
-
-Windows建议下载UWP版[聚合直播](https://www.microsoft.com/store/apps/9N1TWG2G84VD)，体验会更好
+- [Actions](https://github.com/slotsun/dart_simple_live/actions) 里寻找 arb8-legacy 字样下载安装测试
 
 
 ## 项目结构
