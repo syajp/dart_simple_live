@@ -9,14 +9,14 @@ jobs:
       contents: write
     steps:
       # 签出代码 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: master
         
       # APK 签名设置
       - name: Download Android keystore
         id: android_tv_keystore
-        uses: timheuer/base64-to-file@v1.2
+        uses: timheuer/base64-to-file@v2
         with:
           fileName: keystore.jks
           encodedString: ${{ secrets.TV_KEYSTORE_BASE64 }}
@@ -28,7 +28,7 @@ jobs:
           echo "keyAlias=${{ secrets.TV_KEY_ALIAS }}" >> simple_live_tv_app/android/key.properties
 
       # 设置 JAVA 环境
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: "17"
@@ -55,7 +55,7 @@ jobs:
     
       # 上传 APK 至 Artifacts
       - name: Upload APK to Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android_tv
           path: |
