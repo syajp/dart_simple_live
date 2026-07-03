@@ -9,7 +9,7 @@ jobs:
       contents: write
     steps:
       # 签出代码 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           ref: master
         
@@ -55,7 +55,7 @@ jobs:
     
       # 上传 APK 至 Artifacts
       - name: Upload APK to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: android_tv
           path: |
